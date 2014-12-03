@@ -5,6 +5,9 @@ import java.io.PrintWriter;
 import java.util.List;
 
 import javax.ejb.EJB;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Qualifier;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -13,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.sun.xml.internal.ws.api.ha.StickyFeature;
 
+import service.AccountBacking;
 import services.AccountService;
 import services.CarService;
 import domain.Mark;
@@ -30,8 +34,8 @@ public class IndexServlet extends HttpServlet {
 	@EJB
 	CarService carService;
 	
-	@EJB
-	AccountService accountService;
+	@Inject
+	AccountBacking accountBacking;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -58,7 +62,7 @@ public class IndexServlet extends HttpServlet {
 		request.setAttribute("markCount", markCount);
 		request.setAttribute("markList",
 				carService.getCars(page * COUNT_PER_PAGE, COUNT_PER_PAGE));
-		User user = accountService.getUser();
+		User user = accountBacking.getUser();
 		if(user!=null){
 			request.setAttribute("username", user.getName());
 		}
@@ -72,7 +76,7 @@ public class IndexServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		String username = req.getParameter("username");
 		if(username!=null && !username.isEmpty()){
-			accountService.login(new User(username));
+			accountBacking.login(new User(username));
 		}
 		resp.sendRedirect(getServletContext().getContextPath()+"/index");
 	}
