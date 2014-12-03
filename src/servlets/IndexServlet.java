@@ -13,8 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.sun.xml.internal.ws.api.ha.StickyFeature;
 
+import services.AccountService;
 import services.CarService;
 import domain.Mark;
+import domain.User;
 
 /**
  * Servlet implementation class HellotServlet
@@ -27,6 +29,9 @@ public class IndexServlet extends HttpServlet {
 
 	@EJB
 	CarService carService;
+	
+	@EJB
+	AccountService accountService;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -53,15 +58,23 @@ public class IndexServlet extends HttpServlet {
 		request.setAttribute("markCount", markCount);
 		request.setAttribute("markList",
 				carService.getCars(page * COUNT_PER_PAGE, COUNT_PER_PAGE));
+		User user = accountService.getUser();
+		if(user!=null){
+			request.setAttribute("username", user.getName());
+		}
 		request.getRequestDispatcher("/index.jsp").forward(request, response);
-		// try (PrintWriter writer = response.getWriter()) {
-		// writer.println("Hello!");
-		// writer.println("We have "+carService.getCarCount()+" cars marks!");
-		// writer.println("See top 10:");
-		// for(Mark mark: carService.getCars(0, 10)){
-		// writer.println(mark.getName());
-		// }
-		// }
+		
+	}
+	
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		String username = req.getParameter("username");
+		if(username!=null && !username.isEmpty()){
+			accountService.login(new User(username));
+		}
+		resp.sendRedirect(getServletContext().getContextPath()+"/index");
 	}
 
 	private int getPageCount(int count) {

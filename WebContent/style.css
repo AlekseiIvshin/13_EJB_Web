@@ -23,3 +23,14 @@ div.markName{
 	margin-top: 5px;
 	border-radius: 5px;
 }
+
+div.errorMessage{
+	color: red;
+	font-size: 20pt;
+	font-weight: bold;
+}
+div.successMessage{
+	color: green;
+	font-size: 20pt;
+	font-weight: bold;
+}
