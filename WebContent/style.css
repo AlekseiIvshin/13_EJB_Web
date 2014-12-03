@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+
+div.hello {
+	font-size: 20pt;
+	font-weight: bold;
+	color: red;
+}
+
+div.markList {
+	font-size: 16pt;
+}
+
+div.pageList{
+	font-style: italic;
+	font-weight: bold;
+	border-radius: 5px;
+	border: 2px solid gray;
+	margin-top: 20px;
+}
+
+div.markName{
+	border: 2px solid gray;
+	margin-top: 5px;
+	border-radius: 5px;
+}
