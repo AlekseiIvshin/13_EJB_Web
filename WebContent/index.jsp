@@ -10,11 +10,14 @@
 <title>Autoshow</title>
 </head>
 <body>
+	<div class="errorMessage">${hardStatus }</div>
 	<div class="hello">Hello! We have ${markCount } cars marks!</div>
 	<c:choose>
-		<c:when test="${username ne null }">${username }</c:when>
+		<c:when test="${username ne null }">${username }<a
+				href="${pageContext.request.contextPath }/account">Выход</a>
+		</c:when>
 		<c:otherwise>
-			<form action="index" method="post">
+			<form action="account" method="post">
 				<input type="text" name="username" /> <input type="submit"
 					value="Логин" />
 			</form>
@@ -33,6 +36,12 @@
 				value="Создать" />
 		</form>
 	</div>
+	<div class="listconfig">
+		<form action="configuration" method="post">
+			Кол-во автомобилей на странице: <input type="text"
+				name="markCountPerPage" /> <input type="submit" value="Ок" />
+		</form>
+	</div>
 	<div class="markList">
 		<c:forEach var="mark" items="${markList }">
 			<div class="markName">${mark.name }</div>
@@ -40,7 +49,7 @@
 	</div>
 	<div class="pageList">
 		<c:forEach var="page" begin="1" end="${pageCount }">
-			<a href="${pageContext.request.contextPath }/index?page=${page}">${page }</a>
+			<a href="${pageContext.request.contextPath }/index?page=${page-1}">${page }</a>
 		</c:forEach>
 	</div>
 

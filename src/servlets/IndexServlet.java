@@ -1,87 +1,94 @@
 package servlets;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.ejb.EJB;
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Qualifier;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sun.xml.internal.ws.api.ha.StickyFeature;
-
 import service.AccountBacking;
-import services.AccountService;
 import services.CarService;
-import domain.Mark;
+import services.Config;
+import services.HardProcess;
 import domain.User;
 
-/**
- * Servlet implementation class HellotServlet
- */
 @WebServlet("/index")
 public class IndexServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
+	@EJB
+	Config config;
 
 	private static final int COUNT_PER_PAGE = 10;
 
 	@EJB
 	CarService carService;
 	
+	@EJB
+	HardProcess hardProccess;
+
 	@Inject
 	AccountBacking accountBacking;
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public IndexServlet() {
-		super();
-	}
-
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("REQUEST!");
+		initMarks(request);
+		initUserData(request);
+		if(request.getParameter("hard")!=null){
+			initHardProcess(request);
+		}
+		request.getRequestDispatcher("/index.jsp").forward(request, response);
+	}
+
+	private void initMarks(HttpServletRequest request){
 		int page = 0;
 		String pageParameter = request.getParameter("page");
 		if (pageParameter != null && !pageParameter.isEmpty()) {
 			page = Integer.valueOf(request.getParameter("page"));
 		}
+		String strMarkCountPerPage = config.getValue("markCountPerPage");
+		int markCountPerPage = COUNT_PER_PAGE;
+		if (strMarkCountPerPage != null && !strMarkCountPerPage.isEmpty()) {
+			markCountPerPage = Integer.parseInt(strMarkCountPerPage);
+		}
+
 		int markCount = carService.getCarCount();
 		request.setAttribute("page", page);
-		request.setAttribute("pageCount", getPageCount(markCount));
+		request.setAttribute("pageCount",
+				getPageCount(markCount, markCountPerPage));
 		request.setAttribute("markCount", markCount);
 		request.setAttribute("markList",
-				carService.getCars(page * COUNT_PER_PAGE, COUNT_PER_PAGE));
-		User user = accountBacking.getUser();
-		if(user!=null){
-			request.setAttribute("username", user.getName());
-		}
-		request.getRequestDispatcher("/index.jsp").forward(request, response);
-		
+				carService.getCars(page * markCountPerPage, markCountPerPage));
 	}
 	
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		String username = req.getParameter("username");
-		if(username!=null && !username.isEmpty()){
-			accountBacking.login(new User(username));
+	private void initUserData(HttpServletRequest request){
+		User user = accountBacking.getUser();
+		if (user != null) {
+			request.setAttribute("username", user.getName());
 		}
-		resp.sendRedirect(getServletContext().getContextPath()+"/index");
 	}
-
-	private int getPageCount(int count) {
-		return (int) Math.ceil(count / COUNT_PER_PAGE);
+	
+	private void initHardProcess(HttpServletRequest request){
+		String value = request.getParameter("hard");
+		Future<String> resvalue = hardProccess.process(value);
+		String status;
+		try {
+			status = resvalue.get().equals(value)?"success":"error";
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			status = e.getMessage();
+		}
+		request.setAttribute("hardStatus", status);
+	}
+	
+	private int getPageCount(int count, int countOnPage) {
+		return (int) Math.round((double) count / countOnPage);
 	}
 }
