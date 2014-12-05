@@ -29,7 +29,7 @@ public class IndexServlet extends HttpServlet {
 
 	@EJB
 	CarService carService;
-	
+
 	@EJB
 	HardProcess hardProccess;
 
@@ -39,15 +39,15 @@ public class IndexServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		System.out.println("REQUEST!");
-		initMarks(request);
+		initMarksAndPages(request);
 		initUserData(request);
-		if(request.getParameter("hard")!=null){
+		if (request.getParameter("hard") != null) {
 			initHardProcess(request);
 		}
 		request.getRequestDispatcher("/index.jsp").forward(request, response);
 	}
 
-	private void initMarks(HttpServletRequest request){
+	private void initMarksAndPages(HttpServletRequest request) {
 		int page = 0;
 		String pageParameter = request.getParameter("page");
 		if (pageParameter != null && !pageParameter.isEmpty()) {
@@ -60,34 +60,35 @@ public class IndexServlet extends HttpServlet {
 		}
 
 		int markCount = carService.getCarCount();
+		int pageCount = getPageCount(markCount, markCountPerPage);
+		page = Math.min(page, pageCount - 1);
 		request.setAttribute("page", page);
-		request.setAttribute("pageCount",
-				getPageCount(markCount, markCountPerPage));
+		request.setAttribute("pageCount", pageCount);
 		request.setAttribute("markCount", markCount);
 		request.setAttribute("markList",
 				carService.getCars(page * markCountPerPage, markCountPerPage));
 	}
-	
-	private void initUserData(HttpServletRequest request){
+
+	private void initUserData(HttpServletRequest request) {
 		User user = accountBacking.getUser();
 		if (user != null) {
 			request.setAttribute("username", user.getName());
 		}
 	}
-	
-	private void initHardProcess(HttpServletRequest request){
+
+	private void initHardProcess(HttpServletRequest request) {
 		String value = request.getParameter("hard");
 		Future<String> resvalue = hardProccess.process(value);
 		String status;
 		try {
-			status = resvalue.get().equals(value)?"success":"error";
+			status = resvalue.get().equals(value) ? "success" : "error";
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 			status = e.getMessage();
 		}
 		request.setAttribute("hardStatus", status);
 	}
-	
+
 	private int getPageCount(int count, int countOnPage) {
 		return (int) Math.round((double) count / countOnPage);
 	}
