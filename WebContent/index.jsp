@@ -39,7 +39,7 @@
 	<div class="listconfig">
 		<form action="configuration" method="post">
 			Кол-во автомобилей на странице: <input type="text"
-				name="markCountPerPage" /> <input type="submit" value="Ок" />
+				name="view.mark.count.perpage" /> <input type="submit" value="Ок" />
 		</form>
 	</div>
 	<div class="markList">

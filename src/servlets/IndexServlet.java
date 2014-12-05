@@ -38,7 +38,6 @@ public class IndexServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		System.out.println("REQUEST!");
 		initMarksAndPages(request);
 		initUserData(request);
 		if (request.getParameter("hard") != null) {
@@ -53,7 +52,7 @@ public class IndexServlet extends HttpServlet {
 		if (pageParameter != null && !pageParameter.isEmpty()) {
 			page = Integer.valueOf(request.getParameter("page"));
 		}
-		String strMarkCountPerPage = config.getValue("markCountPerPage");
+		String strMarkCountPerPage = config.getValue("view.mark.count.perpage");
 		int markCountPerPage = COUNT_PER_PAGE;
 		if (strMarkCountPerPage != null && !strMarkCountPerPage.isEmpty()) {
 			markCountPerPage = Integer.parseInt(strMarkCountPerPage);
